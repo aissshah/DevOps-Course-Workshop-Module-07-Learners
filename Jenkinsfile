@@ -14,7 +14,8 @@ pipeline {
         }
       }
       environment {
-        DOTNET_CLI_HOME = "/tmp/DOTNET_CLI_HOME"
+        DOTNET_CLI_HOME = '/tmp/DOTNET_CLI_HOME'
+        XDG_DATA_HOME = '/tmp'
       }
 
       steps {
@@ -29,6 +30,7 @@ pipeline {
         }
       }
       steps {
+        dir './DotnetTemplate.Web'
         sh 'node --version'
       }
     }
