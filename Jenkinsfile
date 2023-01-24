@@ -39,3 +39,5 @@ pipeline {
     }
   }
 }
+
+// https://gist.github.com/merikan/228cdb1893fca91f0663bab7b095757c
