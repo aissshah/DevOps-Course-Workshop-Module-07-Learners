@@ -2,15 +2,10 @@ pipeline {
   agent none
 
   stages {
-    // stage ('Clean workspace') {
-    //   steps {
-    //     cleanWs()
-    //   }
-    // }
-    stage('Build C#') {
+    stage('Build and Test C#') {
       agent {
         docker {
-          image 'mcr.microsoft.com/dotnet/sdk:7.0'
+          image 'mcr.microsoft.com/dotnet/sdk:6.0'
         }
       }
       environment {
@@ -21,17 +16,25 @@ pipeline {
       steps {
         echo 'Building...'
         sh 'dotnet build'
+        echo 'Running tests...'
+        sh 'dotnet test'
       }
     }
-    stage('Build node') {
+    stage('Build and Test TS') {
       agent {
         docker { 
           image 'node:16.13.1-alpine' 
         }
       }
       steps {
-        dir './DotnetTemplate.Web'
-        sh 'node --version'
+        dir('./DotnetTemplate.Web') {
+          sh 'node --version'
+          sh 'npm install'
+          sh 'npm run build'
+          echo 'Running tests...'
+          sh 'npm t'
+          sh 'npm run lint'
+        }
       }
     }
   }
