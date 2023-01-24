@@ -5,6 +5,7 @@ jobs:
   build:
     name: Build and test
     runs-on: ubuntu-latest # Sets the build environment a machine with the latest Ubuntu installed
+    # do we want a continue on error here? will slack job run if this job fails?
     steps:
       - uses: actions/checkout@v2 # Adds a step to checkout the repository code
 
@@ -29,3 +30,28 @@ jobs:
       - name: Run Typescript lint check
         working-directory: ./DotnetTemplate.Web
         run: npm run lint
+
+  slack-notice:
+    name: Notify through Slack
+    runs-on: ubuntu-latest
+    needs: build # this makes sure jobs don't run concurrently
+    if: always()
+    steps:
+      - name: Slack send success
+        if: success()
+        uses: dkershner6/post-api-call-action@v1
+        with:
+          url: ${{ secrets.SLACK_HOOK }}
+          data: '{"channel": "#github-actions", "username": "DevOps Module 7 Bot", "text": "The build passed. Congrats to you :tada:. <https://github.com/aissshah/DevOps-Course-Workshop-Module-07-Learners/actions/runs/${{ github.run_id }}|Details here!>", "icon_emoji": ":ghost:"}'
+      - name: Slack send failure
+        if: failure()
+        uses: dkershner6/post-api-call-action@v1
+        with:
+          url: ${{ secrets.SLACK_HOOK }}
+          data: '{"channel": "#github-actions", "username": "DevOps Module 7 Bot", "text": "The build failed. This is sad :cry:. <https://github.com/aissshah/DevOps-Course-Workshop-Module-07-Learners/actions/runs/${{ github.run_id }}|Details here!>", "icon_emoji": ":ghost:"}'
+      - name: Slack send cancelled
+        if: cancelled()
+        uses: dkershner6/post-api-call-action@v1
+        with:
+          url: ${{ secrets.SLACK_HOOK }}
+          data: '{"channel": "#github-actions", "username": "DevOps Module 7 Bot", "text": "The build was cancelled. Do not panic. <https://github.com/aissshah/DevOps-Course-Workshop-Module-07-Learners/actions/runs/${{ github.run_id }}|Details here!>", "icon_emoji": ":ghost:"}'
